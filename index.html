@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Boreas - Automatización Inteligente para Belleza</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root{--background:#0E1114;--surface:#151A1F;--primary-cta:#4C7352;--secondary:#3A4A5A;--accent:#8A98A6;--text-primary:#F1F3F5;--text-secondary:#9AA3AD}
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{background:var(--background);color:var(--text-primary);font-family:"Inter",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.6;overflow-x:hidden}
+    h1,h2,h3{font-family:"Sora",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;font-weight:600;line-height:1.15;letter-spacing:-.3px}
+    .container{max-width:1180px;margin:0 auto;padding:0 20px}
+
+    /* Sticky header */
+    header.site-header{
+      position:fixed;
+      top:0;left:0;right:0;
+      z-index:50;
+      pointer-events:none;
+    }
+    .nav-shell{
+      pointer-events:auto;
+      margin:14px auto 0;
+      max-width:1180px;
+      padding:10px 14px;
+      border-radius:14px;
+      border:1px solid rgba(58,74,90,.38);
+      background:rgba(14,17,20,.58);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+    }
+    .brand{
+      display:flex;
+      align-items:baseline;
+      gap:10px;
+      text-decoration:none;
+      color:var(--text-primary);
+      font-family:"Sora",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      letter-spacing:-.2px;
+      font-weight:700;
+    }
+    .brand small{
+      font-family:"Inter",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      font-weight:500;
+      color:rgba(154,163,173,.9);
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      font-size:.72rem;
+    }
+    nav.primary-nav{
+      display:flex;
+      gap:14px;
+      align-items:center;
+    }
+    nav.primary-nav a{
+      color:rgba(241,243,245,.92);
+      text-decoration:none;
+      font-size:.95rem;
+      padding:8px 10px;
+      border-radius:10px;
+      border:1px solid transparent;
+      transition:background-color .18s ease,border-color .18s ease,transform .18s ease;
+      white-space:nowrap;
+    }
+    nav.primary-nav a:hover{
+      background:rgba(255,255,255,.04);
+      border-color:rgba(58,74,90,.55);
+      transform:translateY(-1px);
+    }
+    .nav-cta{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .nav-cta .cta-button{padding:10px 14px;border-radius:12px;font-size:.95rem}
+
+    /* Mobile menu */
+    .menu-btn{
+      display:none;
+      width:42px;height:42px;
+      border-radius:12px;
+      border:1px solid rgba(58,74,90,.55);
+      background:rgba(21,26,31,.55);
+      color:rgba(241,243,245,.92);
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      transition:transform .18s ease,border-color .18s ease,background-color .18s ease;
+    }
+    .menu-btn:hover{transform:translateY(-1px);border-color:rgba(138,152,166,.55)}
+    .menu-btn:active{transform:translateY(0)}
+
+    .drawer-backdrop{
+      position:fixed;
+      inset:0;
+      background:rgba(14,17,20,.62);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .2s ease;
+      z-index:60;
+    }
+    .drawer{
+      position:fixed;
+      top:0;right:0;
+      height:100vh;
+      width:min(360px,86vw);
+      background:rgba(14,17,20,.86);
+      border-left:1px solid rgba(58,74,90,.45);
+      transform:translateX(100%);
+      transition:transform .22s ease;
+      z-index:70;
+      padding:18px;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+    .drawer-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding-bottom:10px;
+      border-bottom:1px solid rgba(58,74,90,.35);
+    }
+    .drawer a{
+      color:rgba(241,243,245,.92);
+      text-decoration:none;
+      padding:12px 12px;
+      border-radius:12px;
+      border:1px solid rgba(58,74,90,.35);
+      background:rgba(21,26,31,.45);
+    }
+    .drawer a:hover{border-color:rgba(138,152,166,.55);background:rgba(255,255,255,.05)}
+    .drawer .cta-button{width:100%;justify-content:center}
+    .drawer-close{width:42px;height:42px;border-radius:12px;border:1px solid rgba(58,74,90,.55);background:rgba(21,26,31,.55);color:rgba(241,243,245,.92);cursor:pointer}
+
+    body.menu-open .drawer-backdrop{opacity:1;pointer-events:auto}
+    body.menu-open .drawer{transform:translateX(0)}
+
+    /* Global */
+    html{scroll-behavior:smooth}
+
+    .hero{min-height:100vh;display:flex;align-items:center;position:relative;padding:90px 0;overflow:hidden}
+    .hero::before{content:"";position:absolute;inset:0;z-index:-2;opacity:1;background-image:
+      radial-gradient(1200px 720px at 18% 22%, rgba(138,152,166,.11), transparent 60%),
+      radial-gradient(900px 560px at 78% 66%, rgba(58,74,90,.12), transparent 55%);
+      filter:blur(.2px)}
+    .hero::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+      background:radial-gradient(1000px 700px at 40% 35%, transparent 0%, rgba(14,17,20,.35) 55%, rgba(14,17,20,.88) 100%)}
+
+    /* Topographic overlay (external SVG via <img>) */
+    .topo-overlay{
+      position:absolute;
+      inset:-12% -12%;
+      z-index:-1;
+      width:124%;
+      height:124%;
+      object-fit:cover;
+      pointer-events:none;
+      opacity:.14; /* overall strength */
+      filter: opacity(.55) blur(.9px);
+      animation: drift 18s ease-in-out infinite alternate;
+      will-change: transform;
+      transform: translate3d(0,0,0) scale(1.02);
+    }
+    @keyframes drift{
+      from{transform:translate3d(-26px,-18px,0) scale(1.04)}
+      to{transform:translate3d(28px,22px,0) scale(1.04)}
+    }
+
+    .hero-content{max-width:860px}
+    .eyebrow{color:var(--text-secondary);letter-spacing:.14em;text-transform:uppercase;font-size:.78rem;margin-bottom:14px}
+    .hero-headline{font-size:clamp(2.6rem,6vw,4.2rem);font-weight:700;margin-bottom:16px}
+    .hero-subheadline{font-size:clamp(1.1rem,2.7vw,1.45rem);color:var(--text-secondary);margin-bottom:14px;max-width:820px}
+    .hero-subheadline.small{font-size:1.05rem;margin-bottom:34px}
+
+    .word-wrap{
+      position:relative;
+      display:inline-block;
+      width:11ch; /* reserve space to avoid layout shift */
+      height:1em;
+      white-space:nowrap;
+      --dot-x: 4ch; /* will be updated by JS */
+    }
+    #hero-word{
+      position:absolute;
+      left:0;
+      top:0;
+      display:inline-block;
+      transition: opacity .28s ease, transform .28s ease;
+      will-change: opacity, transform;
+    }
+    .hero-dot{
+      position:absolute;
+      left:0;
+      top:0;
+      transform: translateX(var(--dot-x));
+      transition: transform .28s ease;
+      will-change: transform;
+      margin-left:.08em; /* kept for semantic spacing; JS accounts for it */
+    }
+
+    .cta-buttons{display:flex;gap:14px;flex-wrap:wrap}
+    .cta-button{padding:15px 28px;border-radius:8px;font-size:1rem;font-weight:500;text-decoration:none;border:1px solid transparent;display:inline-flex;align-items:center;justify-content:center;transition:transform .22s ease,box-shadow .22s ease,background-color .22s ease,border-color .22s ease;user-select:none}
+    .cta-primary{background:var(--primary-cta);color:#fff;box-shadow:0 0 0 1px rgba(58,74,90,.35),0 14px 38px rgba(76,115,82,.14),0 0 28px rgba(58,74,90,.10)}
+    .cta-primary:hover{transform:translateY(-1px);box-shadow:0 0 0 1px rgba(138,152,166,.22),0 18px 46px rgba(76,115,82,.18),0 0 34px rgba(58,74,90,.14)}
+    .cta-primary:active{transform:translateY(0)}
+    .cta-secondary{background:transparent;color:var(--text-primary);border-color:rgba(58,74,90,.9);box-shadow:0 0 0 1px rgba(58,74,90,.35)}
+    .cta-secondary:hover{background:rgba(255,255,255,.04);border-color:rgba(138,152,166,.55)}
+
+    section{padding:110px 0}
+    .section-title{font-size:clamp(1.9rem,3.6vw,2.7rem);margin-bottom:20px}
+    .section-subtitle{font-size:1.15rem;color:var(--text-secondary);max-width:860px}
+    .surface{background:rgba(21,26,31,.86);border:1px solid rgba(58,74,90,.35);border-radius:14px;padding:26px;backdrop-filter:blur(2px)}
+
+    .kicker{color:rgba(154,163,173,.9);letter-spacing:.14em;text-transform:uppercase;font-size:.78rem;margin-bottom:10px}
+
+    .surface.card{position:relative;overflow:visible;min-height:178px;display:flex;flex-direction:column;justify-content:flex-start;transition:transform .22s ease, box-shadow .22s ease, border-color .22s ease}
+
+    /* Inner sheen (subtle) */
+    .surface.card::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:inherit;
+      pointer-events:none;
+      opacity:0;
+      transition:opacity .22s ease;
+      background:radial-gradient(520px 220px at 18% 0%, rgba(76,115,82,.18), transparent 62%),
+                 radial-gradient(520px 220px at 82% 100%, rgba(76,115,82,.10), transparent 66%);
+    }
+
+    /* Outer underlight (projects to the background) */
+    .surface.card::after{
+      content:"";
+      position:absolute;
+      left:10px;
+      right:10px;
+      bottom:-10px;
+      height:32px;
+      border-radius:999px;
+      pointer-events:none;
+      opacity:0;
+      transition:opacity .22s ease, transform .22s ease;
+      background:radial-gradient(closest-side, rgba(76,115,82,.55), transparent 70%);
+      filter:blur(12px);
+      transform:translateY(8px);
+    }
+
+    .surface.card:hover{
+      transform:translateY(-6px) scale(1.02) !important;
+      border-color:rgba(76,115,82,.62);
+      box-shadow:0 0 0 1px rgba(76,115,82,.22), 0 28px 72px rgba(0,0,0,.45);
+    }
+    .surface.card.card-anim:hover{animation:none !important}
+    .surface.card:hover::before{opacity:1}
+    .surface.card:hover::after{opacity:1;transform:translateY(0)}
+
+    @keyframes cardPulse{
+      0%{transform:translateY(0) scale(1); border-color:rgba(58,74,90,.35); box-shadow:none}
+      8%{transform:translateY(-6px) scale(1.02); border-color:rgba(76,115,82,.58); box-shadow:0 0 0 1px rgba(76,115,82,.18), 0 28px 72px rgba(0,0,0,.45)}
+      16%{transform:translateY(-6px) scale(1.02); border-color:rgba(76,115,82,.58); box-shadow:0 0 0 1px rgba(76,115,82,.18), 0 28px 72px rgba(0,0,0,.45)}
+      22%{transform:translateY(0) scale(1); border-color:rgba(58,74,90,.35); box-shadow:none}
+      100%{transform:translateY(0) scale(1); border-color:rgba(58,74,90,.35); box-shadow:none}
+    }
+
+    .card-anim{animation:cardPulse 12s ease-in-out infinite; animation-delay:var(--d);}
+
+    /* Pause the sequential animation when user interacts */
+    .card-anim:hover{animation-play-state:paused}
+    .tension{padding:90px 0;background:linear-gradient(180deg,rgba(21,26,31,0),rgba(21,26,31,.35),rgba(21,26,31,0))}
+    .tension .statement{text-align:center;font-family:"Sora",sans-serif;font-weight:600;font-size:clamp(1.6rem,3.4vw,2.2rem);max-width:920px;margin:0 auto}
+
+    .advantage-grid{margin-top:38px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;align-items:stretch}
+    .card h3{margin-bottom:10px}
+
+    .problem-grid{margin-top:34px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+    .problem-item{display:flex;gap:12px;align-items:flex-start}
+    .dot{width:8px;height:8px;border-radius:50%;background:rgba(138,152,166,.9);margin-top:8px;flex-shrink:0}
+
+    .system-flow{margin-top:46px;position:relative;display:flex;flex-direction:column;gap:26px;padding-left:10px}
+    .system-flow::before{content:"";position:absolute;left:30px;top:10px;bottom:10px;width:2px;background:rgba(138,152,166,.25)}
+    .system-step{display:grid;grid-template-columns:60px 1fr;gap:18px;align-items:start}
+    .step-number{width:44px;height:44px;border-radius:999px;background:rgba(21,26,31,.92);border:1px solid rgba(58,74,90,.45);display:flex;align-items:center;justify-content:center;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;font-size:.9rem;color:rgba(241,243,245,.92)}
+    .step-content h3{margin-bottom:6px}
+
+    .fade-in{opacity:0;transform:translateY(18px);transition:opacity .65s ease,transform .65s ease;will-change:opacity,transform}
+    .fade-in.appear{opacity:1;transform:translateY(0)}
+    .conversion{padding-top:90px;padding-bottom:120px}
+    .center{text-align:center}
+
+    @media (max-width:768px){
+      section{padding:80px 0}
+      .cta-buttons{flex-direction:column;align-items:stretch}
+      .system-flow::before{display:none}
+      .system-step{grid-template-columns:1fr}
+      .word-wrap{width:auto;height:auto;white-space:normal}
+      #hero-word{position:static}
+      .hero-dot{position:static;transform:none;margin-left:.08em}
+      header.site-header .nav-cta{display:none}
+      header.site-header nav.primary-nav{display:none}
+      header.site-header .menu-btn{display:inline-flex}
+      .advantage-grid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header" aria-label="Navegación">
+    <div class="nav-shell">
+      <a class="brand" href="#hero" aria-label="Boreas">
+        Boreas <small>Automatización</small>
+      </a>
+
+      <nav class="primary-nav" aria-label="Secciones">
+        <a href="#what-we-do">Qué hacemos</a>
+        <a href="#problem">Problema</a>
+        <a href="#system">Lo que cambia todo</a>
+        <a href="#conversion">Guía / Llamada</a>
+        <a href="#contact">Contacto</a>
+      </nav>
+
+      <div class="nav-cta">
+        <a href="#conversion" class="cta-button cta-secondary">Guía</a>
+        <a href="#contact" class="cta-button cta-primary">Agendar</a>
+      </div>
+
+      <button class="menu-btn" type="button" aria-label="Abrir menú" aria-controls="mobile-drawer" aria-expanded="false">☰</button>
+    </div>
+  </header>
+
+  <div class="drawer-backdrop" data-close-drawer="true" aria-hidden="true"></div>
+  <aside class="drawer" id="mobile-drawer" aria-label="Menú">
+    <div class="drawer-head">
+      <div>
+        <div style="font-family:Sora,system-ui; font-weight:700; letter-spacing:-.2px;">Boreas</div>
+        <div style="color:rgba(154,163,173,.9); font-size:.85rem; margin-top:2px;">Navegación</div>
+      </div>
+      <button class="drawer-close" type="button" aria-label="Cerrar menú" data-close-drawer="true">✕</button>
+    </div>
+
+    <a href="#what-we-do" data-close-drawer="true">Qué hacemos</a>
+    <a href="#problem" data-close-drawer="true">Problema</a>
+    <a href="#system" data-close-drawer="true">Lo que cambia todo</a>
+    <a href="#conversion" data-close-drawer="true">Guía / Llamada</a>
+    <a href="#contact" data-close-drawer="true">Contacto</a>
+
+    <div style="margin-top:auto; display:grid; gap:10px;">
+      <a href="#conversion" class="cta-button cta-secondary" data-close-drawer="true">Descargar guía</a>
+      <a href="#contact" class="cta-button cta-primary" data-close-drawer="true">Agendar llamada privada</a>
+    </div>
+  </aside>
+
+  <section class="hero" id="hero">
+    <div class="container">
+      <div class="hero-content">
+        <div class="eyebrow">Boreas · Automatización operativa</div>
+        <h1 class="hero-headline">Más <span class="word-wrap"><span id="hero-word">citas</span><span class="hero-dot">.</span></span></h1>
+        <p class="hero-subheadline">Cada espacio vacío en tu agenda tiene un costo.</p>
+        <p class="hero-subheadline small">Necesitas la ventaja que tu competencia ya usa.</p>
+        <div class="cta-buttons">
+          <a href="#" class="cta-button cta-primary">Descargar guía estratégica</a>
+          <a href="#system" class="cta-button cta-secondary">Saber más</a>
+        </div>
+      </div>
+      <!-- Topographic background (archivo externo). Coloca tu SVG en `assets/topo.svg` dentro de esta misma carpeta (boreas-static/assets/topo.svg). -->
+      <img class="topo-overlay" src="./assets/topo.svg" alt="" aria-hidden="true" />
+    </div>
+  </section>
+
+  <section class="tension" id="tension">
+    <div class="container">
+      <div class="statement fade-in">Si respondes mensajes manualmente, ya vas tarde.</div>
+    </div>
+  </section>
+
+
+<section id="what-we-do">
+  <div class="container">
+    <h2 class="section-title fade-in">Lo que hacemos</h2>
+    <p class="section-subtitle fade-in">Boreas existe para quitarte trabajo manual: menos mensajes que perseguir, menos huecos en la agenda, más control sobre tus ingresos.</p>
+    <div class="cards-group" aria-label="Ventajas de Boreas">
+      <div class="kicker fade-in" style="margin-top:18px;">Boreas</div>
+      <div class="advantage-grid">
+        <div class="surface card card-anim fade-in" style="--d:0ms;">
+          <h3>Velocidad que gana citas</h3>
+          <p>Diseñamos respuestas y reglas para que cada mensaje reciba atención inmediata, antes de que el interés se enfríe.</p>
+        </div>
+        <div class="surface card card-anim fade-in" style="--d:2000ms;">
+          <h3>Agenda bajo control</h3>
+          <p>Quitamos el “te confirmo luego”. Confirmación clara, cambios simples y menos ausencias.</p>
+        </div>
+        <div class="surface card card-anim fade-in" style="--d:4000ms;">
+          <h3>Recurrencia sin persecución</h3>
+          <p>Seguimiento que se siente natural: el cliente regresa porque la experiencia fue buena desde el primer contacto.</p>
+        </div>
+        <div class="surface card card-anim fade-in" style="--d:6000ms;">
+          <h3>La automatización ya decidió</h3>
+          <p>No es el futuro. Es la ventaja operativa que hoy separa agendas llenas de agendas vacías.</p>
+        </div>
+        <div class="surface card card-anim fade-in" style="--d:8000ms;">
+          <h3>Invisible, pero implacable</h3>
+          <p>El cliente ve rapidez y claridad. Tú ves control. La complejidad se queda detrás.</p>
+        </div>
+        <div class="surface card card-anim fade-in" style="--d:10000ms;">
+          <h3>Precisión que se nota</h3>
+          <p>Menos errores, menos huecos, menos ausencias. Cuando todo encaja, la confianza sube sola.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+  <section id="problem">
+    <div class="container">
+      <h2 class="section-title fade-in">El problema real en belleza</h2>
+      <p class="section-subtitle fade-in">Agenda inestable no es falta de demanda. Es falta de velocidad y confirmación.</p>
+      <div class="problem-grid">
+        <div class="surface fade-in"><div class="problem-item"><div class="dot"></div><div><h3>No-shows</h3><p>Citas perdidas por confirmación débil.</p></div></div></div>
+        <div class="surface fade-in"><div class="problem-item"><div class="dot"></div><div><h3>Leads sin seguimiento</h3><p>Interés que se enfría en minutos.</p></div></div></div>
+        <div class="surface fade-in"><div class="problem-item"><div class="dot"></div><div><h3>Saturación de mensajes</h3><p>Tiempo perdido coordinando lo obvio.</p></div></div></div>
+        <div class="surface fade-in"><div class="problem-item"><div class="dot"></div><div><h3>Agenda impredecible</h3><p>Ingresos variables semana a semana.</p></div></div></div>
+        <div class="surface fade-in"><div class="problem-item"><div class="dot"></div><div><h3>Sin reactivación</h3><p>Clientes que se van sin volver.</p></div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="system">
+    <div class="container">
+      <h2 class="section-title fade-in">Lo que cambia todo.</h2>
+      <p class="section-subtitle fade-in">Los clientes sí preguntan. El problema es quién les agenda primero.</p>
+      <div class="system-flow">
+        <div class="system-step fade-in"><div class="step-number">01</div><div class="step-content"><h3>Llega el mensaje.</h3><p>La duda empieza a enfriarse en segundos.</p></div></div>
+        <div class="system-step fade-in"><div class="step-number">02</div><div class="step-content"><h3>Respuesta inmediata.</h3><p>Antes de que tu competencia lo haga.</p></div></div>
+        <div class="system-step fade-in"><div class="step-number">03</div><div class="step-content"><h3>Cita confirmada.</h3><p>Sin perseguir. Sin dar mil opciones de fechas.</p></div></div>
+        <div class="system-step fade-in"><div class="step-number">04</div><div class="step-content"><h3>Recordatorio claro.</h3><p>Sin excusas. Sin ausencias.</p></div></div>
+        <div class="system-step fade-in"><div class="step-number">05</div><div class="step-content"><h3>La segunda cita se agenda sola.</h3><p>Porque la experiencia fue sencilla desde el primer mensaje.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="conversion" id="conversion">
+    <div class="container center">
+      <h2 class="section-title fade-in">Dos caminos. Una decisión.</h2>
+      <p class="section-subtitle fade-in" style="margin:0 auto;">Guía estratégica para entender el sistema. Llamada privada para implementarlo bien.</p>
+      <div class="cta-buttons" style="justify-content:center; margin-top:34px;">
+        <a href="#" class="cta-button cta-primary">Descargar guía estratégica</a>
+        <a href="#" class="cta-button cta-secondary">Agendar llamada privada</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="container">
+      <h2 class="section-title fade-in">Contacto</h2>
+      <p class="section-subtitle fade-in">Si tu agenda se siente inestable, es una señal. Boreas te da control operativo sin ruido.</p>
+
+      <div class="advantage-grid" style="margin-top:26px;">
+        <div class="surface fade-in">
+          <h3 style="margin-bottom:10px;">Agendar llamada privada</h3>
+          <p style="color:var(--text-secondary); margin-bottom:16px;">Una conversación breve. Sin presión. Solo claridad.</p>
+
+          <form id="contact-form" autocomplete="on" style="display:grid; gap:12px;">
+            <label style="display:grid; gap:6px;">
+              <span style="color:rgba(241,243,245,.9); font-size:.92rem;">Nombre</span>
+              <input name="name" type="text" required placeholder="Tu nombre" style="padding:12px 12px; border-radius:12px; border:1px solid rgba(58,74,90,.55); background:rgba(14,17,20,.55); color:var(--text-primary); outline:none;" />
+            </label>
+            <label style="display:grid; gap:6px;">
+              <span style="color:rgba(241,243,245,.9); font-size:.92rem;">WhatsApp</span>
+              <input name="phone" type="tel" required placeholder="+52 ..." style="padding:12px 12px; border-radius:12px; border:1px solid rgba(58,74,90,.55); background:rgba(14,17,20,.55); color:var(--text-primary); outline:none;" />
+            </label>
+            <label style="display:grid; gap:6px;">
+              <span style="color:rgba(241,243,245,.9); font-size:.92rem;">Negocio</span>
+              <input name="business" type="text" placeholder="Salón, spa, lashes..." style="padding:12px 12px; border-radius:12px; border:1px solid rgba(58,74,90,.55); background:rgba(14,17,20,.55); color:var(--text-primary); outline:none;" />
+            </label>
+            <label style="display:grid; gap:6px;">
+              <span style="color:rgba(241,243,245,.9); font-size:.92rem;">Mensaje</span>
+              <textarea name="message" rows="4" placeholder="Qué te está quitando tiempo hoy" style="padding:12px 12px; border-radius:12px; border:1px solid rgba(58,74,90,.55); background:rgba(14,17,20,.55); color:var(--text-primary); outline:none; resize:vertical;"></textarea>
+            </label>
+            <button class="cta-button cta-primary" type="submit" style="width:100%;">Enviar</button>
+            <div id="contact-note" style="color:rgba(154,163,173,.95); font-size:.92rem;">(Por ahora, este formulario es visual. La conexión real se integra en la siguiente fase.)</div>
+          </form>
+        </div>
+
+        <div class="surface fade-in">
+          <h3 style="margin-bottom:10px;">Qué pasa después</h3>
+          <p style="color:var(--text-secondary);">Sin promesas vacías. Un proceso simple.</p>
+          <div class="system-flow" style="margin-top:18px; gap:18px;">
+            <div class="system-step" style="grid-template-columns:54px 1fr;">
+              <div class="step-number">01</div>
+              <div class="step-content"><h3 style="margin-bottom:6px;">Diagnóstico</h3><p>Vemos dónde se fuga tu tiempo y tu demanda.</p></div>
+            </div>
+            <div class="system-step" style="grid-template-columns:54px 1fr;">
+              <div class="step-number">02</div>
+              <div class="step-content"><h3 style="margin-bottom:6px;">Diseño</h3><p>Definimos reglas, mensajes y rutas. Sin complejidad innecesaria.</p></div>
+            </div>
+            <div class="system-step" style="grid-template-columns:54px 1fr;">
+              <div class="step-number">03</div>
+              <div class="step-content"><h3 style="margin-bottom:6px;">Implementación</h3><p>Se integra y se prueba. Tu equipo lo usa sin curva de aprendizaje.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer style="padding:46px 0 70px; border-top:1px solid rgba(58,74,90,.35); background:rgba(14,17,20,.6);">
+    <div class="container" style="display:flex; flex-wrap:wrap; gap:18px; align-items:flex-start; justify-content:space-between;">
+      <div style="min-width:240px;">
+        <div style="font-family:Sora,system-ui; font-weight:700; letter-spacing:-.2px; font-size:1.1rem;">Boreas</div>
+        <div style="color:rgba(154,163,173,.95); margin-top:8px; max-width:420px;">Automatización operativa para convertir interés en agenda confirmada.</div>
+      </div>
+
+      <div style="display:flex; gap:34px; flex-wrap:wrap;">
+        <div>
+          <div style="color:rgba(241,243,245,.92); font-weight:600; margin-bottom:10px;">Secciones</div>
+          <div style="display:grid; gap:10px;">
+            <a href="#what-we-do" style="color:rgba(154,163,173,.95); text-decoration:none;">Qué hacemos</a>
+            <a href="#problem" style="color:rgba(154,163,173,.95); text-decoration:none;">Problema</a>
+            <a href="#system" style="color:rgba(154,163,173,.95); text-decoration:none;">Lo que cambia todo</a>
+            <a href="#contact" style="color:rgba(154,163,173,.95); text-decoration:none;">Contacto</a>
+          </div>
+        </div>
+        <div>
+          <div style="color:rgba(241,243,245,.92); font-weight:600; margin-bottom:10px;">Acciones</div>
+          <div style="display:grid; gap:10px;">
+            <a href="#conversion" style="color:rgba(154,163,173,.95); text-decoration:none;">Descargar guía</a>
+            <a href="#contact" style="color:rgba(154,163,173,.95); text-decoration:none;">Agendar llamada</a>
+          </div>
+        </div>
+      </div>
+
+      <div style="color:rgba(154,163,173,.85); font-size:.92rem;">
+        © <span id="year"></span> Boreas. Todos los derechos reservados.
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const fadeElements = document.querySelectorAll('.fade-in');
+      const obs = new IntersectionObserver((entries) => {
+        entries.forEach((e) => { if (e.isIntersecting) e.target.classList.add('appear'); });
+      }, { threshold: 0.12 });
+      fadeElements.forEach((el) => obs.observe(el));
+
+      const words = ["citas","ventas","control","tiempo","ganancias","eficiencia","retención","clientas"];
+      const wordEl = document.getElementById('hero-word');
+      let i = 0;
+      const updateDot = () => {
+        const wrap = wordEl.closest('.word-wrap');
+        const dot = wrap?.querySelector('.hero-dot');
+        if (!wrap || !dot) return;
+        // Measure rendered word width and add a small spacing (in px)
+        const w = wordEl.getBoundingClientRect().width;
+        wrap.style.setProperty('--dot-x', `${Math.ceil(w) + 6}px`);
+      };
+      updateDot();
+      setInterval(() => {
+        i = (i + 1) % words.length;
+        wordEl.style.opacity = '0';
+        wordEl.style.transform = 'translateY(8px)';
+        setTimeout(() => {
+          wordEl.textContent = words[i];
+          updateDot();
+          wordEl.style.opacity = '1';
+          wordEl.style.transform = 'translateY(0)';
+        }, 180);
+      }, 1600);
+      window.addEventListener('resize', updateDot);
+
+      // Footer year
+      const y = document.getElementById('year');
+      if (y) y.textContent = String(new Date().getFullYear());
+
+      // Mobile drawer
+      const body = document.body;
+      const menuBtn = document.querySelector('.menu-btn');
+      const closeEls = document.querySelectorAll('[data-close-drawer="true"]');
+      const setMenu = (open) => {
+        body.classList.toggle('menu-open', open);
+        if (menuBtn) menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      };
+      if (menuBtn) menuBtn.addEventListener('click', () => setMenu(true));
+      closeEls.forEach((el) => el.addEventListener('click', () => setMenu(false)));
+      window.addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenu(false); });
+    });
+  </script>
+</body>
+</html>
