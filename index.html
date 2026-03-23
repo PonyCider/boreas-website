@@ -324,12 +324,9 @@
     }
 
     .word-wrap {
-      position: relative;
-      display: inline-block;
-      width: 11ch;
+      display: inline-grid;
+      width: 12ch;
       /* reserve space to avoid layout shift */
-      height: 1em;
-      line-height: 1;
       white-space: nowrap;
       vertical-align: baseline;
       --dot-x: 4ch;
@@ -337,20 +334,18 @@
     }
 
     #hero-word {
-      position: absolute;
-      left: 0;
-      bottom: 0;
+      grid-area: 1 / 1;
+      justify-self: start;
+      align-self: baseline;
       display: inline-block;
-      line-height: 1;
       transition: opacity .28s ease, transform .28s ease;
       will-change: opacity, transform;
     }
 
     .hero-dot {
-      position: absolute;
-      left: 0;
-      bottom: 0;
-      line-height: 1;
+      grid-area: 1 / 1;
+      justify-self: start;
+      align-self: baseline;
       transform: translateX(var(--dot-x));
       transition: transform .28s ease;
       will-change: transform;
@@ -666,23 +661,6 @@
 
       .system-step {
         grid-template-columns: 1fr
-      }
-
-      .word-wrap {
-        width: auto;
-        height: auto;
-        line-height: inherit;
-        white-space: normal
-      }
-
-      #hero-word {
-        position: static
-      }
-
-      .hero-dot {
-        position: static;
-        transform: none;
-        margin-left: .08em
       }
 
       header.site-header .nav-cta {
@@ -1039,7 +1017,7 @@
       }, { threshold: 0.12 });
       fadeElements.forEach((el) => obs.observe(el));
 
-      const words = ["citas", "ventas", "control", "tiempo", "ganancias", "eficiencia", "retención", "clientas"];
+      const words = ["citas", "ventas", "tiempo", "control", "clientas", "retención", "eficiencia", "ganancias"];
       const wordEl = document.getElementById('hero-word');
       let i = 0;
       const updateDot = () => {
