@@ -329,7 +329,9 @@
       width: 11ch;
       /* reserve space to avoid layout shift */
       height: 1em;
+      line-height: 1;
       white-space: nowrap;
+      vertical-align: baseline;
       --dot-x: 4ch;
       /* will be updated by JS */
     }
@@ -337,8 +339,9 @@
     #hero-word {
       position: absolute;
       left: 0;
-      top: 0;
+      bottom: 0;
       display: inline-block;
+      line-height: 1;
       transition: opacity .28s ease, transform .28s ease;
       will-change: opacity, transform;
     }
@@ -346,7 +349,8 @@
     .hero-dot {
       position: absolute;
       left: 0;
-      top: 0;
+      bottom: 0;
+      line-height: 1;
       transform: translateX(var(--dot-x));
       transition: transform .28s ease;
       will-change: transform;
@@ -667,6 +671,7 @@
       .word-wrap {
         width: auto;
         height: auto;
+        line-height: inherit;
         white-space: normal
       }
 
